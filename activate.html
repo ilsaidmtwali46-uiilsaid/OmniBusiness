@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>تفعيل ترخيص التطبيق - مزرعة الإخلاص</title>
+<style>
+:root{--green:#166534;--pale:#f0fdf4;--ink:#17211b;--muted:#64748b;--red:#b91c1c}
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#f3f7f4;color:var(--ink);display:flex;justify-content:center;align-items:center;min-height:100vh;padding:15px}
+.card{background:#fff;border:1px solid #d1d5db;border-radius:16px;padding:24px;width:100%;max-width:400px;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+h2{color:var(--green);margin-top:0;font-size:20px;text-align:center}
+p.muted{color:var(--muted);font-size:13px;text-align:center;margin-bottom:20px}
+label{display:block;font-size:13px;font-weight:bold;margin-bottom:5px}
+input{width:100%;font:inherit;font-size:15px;padding:10px;border:1px solid #cbd5cf;border-radius:10px;margin-bottom:15px;text-align:center;letter-spacing:1px}
+button.action{width:100%;border:0;border-radius:10px;background:var(--green);color:#fff;padding:12px;font:inherit;font-weight:bold;cursor:pointer}
+.note{font-size:12px;color:var(--muted);text-align:center;margin-top:15px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2>🔒 تفعيل ترخيص التشغيل</h2>
+  <p class="muted">الرجاء إدخال كود التشغيل المقدم من الإدارة لفتح التطبيق</p>
+  
+  <label for="licenseKey">كود التفعيل (License Key)</label>
+  <input type="text" id="licenseKey" placeholder="مثال: OMNI-2026-XXXX">
+  
+  <button class="action" id="activateBtn" type="button">تحقق وتفعيل</button>
+  
+  <div class="note">
+    للحصول على كود التشغيل أو تجديد الترخيص، يرجى التواصل مع إدارة <b>مزرعة الإخلاص (السيد متولي)</b>.
+    <br><i>خصوصية كاملة وأمان تام للبيانات.</i>
+  </div>
+</div>
+
+<script>
+const DB_LICENSE_KEY = 'omni_app_license_verified';
+
+// مفاتيح التفعيل التجريبية الصادرة من الإدارة (كمثال أولي)
+// يمكنك لاحقاً ربطها بقاعدة بيانات سحابية أو Firebase
+const VALID_KEYS = ["MOTAWALLY-2026", "OMNI-SUPER-100", "ELIKHLAS-FARM"];
+
+document.getElementById('activateBtn').onclick = function() {
+  let key = document.getElementById('licenseKey').value.trim();
+  
+  if(!key) {
+    alert('الرجاء إدخال كود التفعيل أولاً.');
+    return;
+  }
+  
+  if(VALID_KEYS.includes(key)) {
+    // حفظ حالة التفعيل محلياً لهذا العميل بخصوصية تامة
+    localStorage.setItem(DB_LICENSE_KEY, 'true');
+    localStorage.setItem('omni_active_key', key);
+    alert('🟢 تم تفعيل الترخيص بنجاح! يتم الآن توجيهك للتطبيق...');
+    window.location.href = 'index.html'; // الانتقال للرئيسية بعد التفعيل
+  } else {
+    alert('🔴 كود التفعيل غير صحيح. يرجى مراجعة الإدارة.');
+  }
+};
+
+// فحص مسبق: إذا كان مفعل مسبقاً، حوله للرئيسية مباشرة
+if(localStorage.getItem(DB_LICENSE_KEY) === 'true') {
+  window.location.href = 'index.html';
+}
+</script>
+<!-- سكربت استقبال البث والتحديثات المباشرة للشريط الدعائي -->
+<script>
+(function initBroadcastSystem() {
+  const BROADCAST_DB = 'omni_broadcast_messages';
+  const activeKey = localStorage.getItem('omni_active_key') || '';
+
+  function checkBroadcast() {
+    try {
+      let savedMsg = localStorage.getItem(BROADCAST_DB);
+      if (savedMsg) {
+        let msgObj = JSON.parse(savedMsg);
+        if (msgObj.target === 'ALL' || msgObj.target === activeKey) {
+          let marqueeContainer = document.querySelector('.marquee-container');
+          if (marqueeContainer) {
+            marqueeContainer.innerHTML = `<marquee behavior="scroll" direction="right" scrollamount="4">
+              ${msgObj.type}: ${msgObj.text} • إدارة: السيد متولي (مزرعة الإخلاص)
+            </marquee>`;
+          }
+        }
+      }
+    } catch (e) {}
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkBroadcast);
+  } else {
+    checkBroadcast();
+  }
+})();
+</script>
+
+</body>
+</html>
